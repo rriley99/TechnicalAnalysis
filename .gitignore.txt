@@ -1,4 +1,6 @@
 #environments
+.venv/
+venv/
 .venv
 venv
 requirements.txt
