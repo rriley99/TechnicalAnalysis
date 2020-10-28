@@ -15,7 +15,6 @@ class Sentiment_FinViz:
         self.tickers = tickers
         self.conn = conn
         self.cur = cur
-
     def Get_News(self, tickers):
         self.news_tables = {}
 

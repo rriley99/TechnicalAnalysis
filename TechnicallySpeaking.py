@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import requests
 import json
 import pandas as pd
-#from Sentiment import Sentiment_FinViz
-from TechnicalAnalysis import TechnicalAnalysis
+from DataLoading import DataLoading
+import TechnicalAnalysis
 
+capital = 100000
+risk = 0.05
 conn = pg.connect("dbname=StonksGoUp user=postgres host=localhost password=admin")
 cur = conn.cursor()
 
@@ -13,17 +15,19 @@ with open('TechnicallySpeaking/local_settings.txt') as f:
     json_local = json.load(f)
 
 finn_token = json_local["finn_token"]
-tickers = ['SQ','TSLA']
 
-analysis = TechnicalAnalysis(conn, cur)
-update_tickers = analysis.update_data(conn, cur)
-#print(update_tickers[:10])
+sql_tickers = """SELECT 
+                ticker
+                FROM tickers
+                WHERE isdow='true'
+                GROUP BY ticker
+                """
+cur.execute(sql_tickers,conn)
+tickers = cur.fetchall()
+print(tickers)
 
-
-
-
-
-
+rowcount, df_analyzed = TechnicalAnalysis.do_analysis(conn, cur, finn_token, tickers, capital, risk)
+print(df_analyzed)
 
 # sentiment = Sentiment_FinViz(tickers, conn, cur)
 # news_tables = sentiment.Get_News(tickers)
