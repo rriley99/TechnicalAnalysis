@@ -69,9 +69,13 @@ class TechnicalAnalysis:
                                 """
         self.cur.execute(self.update_tickers, self.conn)
         self.update_tuple = self.cur.fetchall()
-        if self.update_tuple[0][3] == datetime.utcnow().date():
+        self.date_catch = np.where((datetime.today() - pd.tseries.offsets.BDay(0)) > datetime.today(),
+                                   (datetime.today() - pd.tseries.offsets.BDay(1)),
+                                   (datetime.today() - pd.tseries.offsets.BDay(0)))
+        """It would be intelligent to add a catch for holidays as well."""
+        if self.update_tuple[0][3] > self.date_catch:
             print(f"{self.ticker[0]} is up-to-date.")
-        
+            
             return None
         
         else:
