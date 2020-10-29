@@ -15,7 +15,7 @@ local_settings.json
 local_settings.txt
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
 
 # Distribution / packaging
 .Python
