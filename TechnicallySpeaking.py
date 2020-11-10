@@ -2,16 +2,18 @@ import psycopg2 as pg
 from datetime import datetime, timedelta
 import requests
 import json
+import numpy as np
 import pandas as pd
 from DataLoading import DataLoading
-import TechnicalAnalysis
+from TechnicalAnalysis import *
+import time 
 
-capital = 100000
-risk = 0.05
+capital = 5000
+risk = 0.0562
 conn = pg.connect("dbname=StonksGoUp user=postgres host=localhost password=admin")
 cur = conn.cursor()
 
-with open('TechnicallySpeaking/local_settings.txt') as f:
+with open('local_settings.txt') as f:
     json_local = json.load(f)
 
 finn_token = json_local["finn_token"]
@@ -19,19 +21,24 @@ finn_token = json_local["finn_token"]
 sql_tickers = """SELECT 
                 ticker
                 FROM tickers
-                WHERE isdow='true'
+                WHERE issp500='true'
                 GROUP BY ticker
+                ORDER BY ticker ASC
+                LIMIT 25
                 """
 cur.execute(sql_tickers,conn)
 tickers = cur.fetchall()
-print(tickers)
+start_time = datetime.now()
 
-rowcount, df_analyzed = TechnicalAnalysis.do_analysis(conn, cur, finn_token, tickers, capital, risk)
+df_analyzed = do_analysis(conn, cur, finn_token, tickers, capital, risk)
 print(df_analyzed)
 
-# sentiment = Sentiment_FinViz(tickers, conn, cur)
-# news_tables = sentiment.Get_News(tickers)
-# parsed_news = sentiment.Parse_News(news_tables)
-# parsed_and_scored_news = sentiment.Get_Sentiment(parsed_news)
-# parsed_and_scored_news = parsed_and_scored_news.loc[parsed_and_scored_news['timestamp']>(datetime.today() - timedelta(7)),:]
-#print(parsed_and_scored_news.groupby(['ticker']).mean())
+outputfile = f'Output_{datetime.now().date()}.xlsx'
+df_analyzed.to_excel(outputfile)
+
+end_time = datetime.now()
+print(f"Completed in {end_time - start_time}")
+
+if 'cur' in locals():
+    cur.close()
+    conn.close() 
